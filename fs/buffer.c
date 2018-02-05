@@ -148,18 +148,26 @@ static inline void remove_from_queues(struct buffer_head * bh)
 
 static inline void insert_into_queues(struct buffer_head * bh)
 {
-/* put at end of free list */
+	/* put at end of free list */
+	/* cqx:insert after old tail
+	 * change the bh pointer */
 	bh->b_next_free = free_list;
 	bh->b_prev_free = free_list->b_prev_free;
+	/* cqx:change bh ringth and left link */
 	free_list->b_prev_free->b_next_free = bh;
 	free_list->b_prev_free = bh;
-/* put the buffer in new hash-queue if it has a device */
+	/* put the buffer in new hash-queue if it has a device */
 	bh->b_prev = NULL;
 	bh->b_next = NULL;
 	if (!bh->b_dev)
 		return;
+	/* cqx:insert before tail 
+	 * kb_next = old 
+	 */
 	bh->b_next = hash(bh->b_dev,bh->b_blocknr);
+	/* cqx:updata current hash buf */
 	hash(bh->b_dev,bh->b_blocknr) = bh;
+	/* cqx:change the tail pointer */
 	bh->b_next->b_prev = bh;
 }
 
